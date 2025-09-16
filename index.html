@@ -488,16 +488,19 @@
       <div class="main-inputs">
         <div class="card">
           <div class="calculator">
-            <div class="input-group">
-              <label for="productLink">Product Link</label>
-              <input id="productLink" type="url" placeholder="https://example.com/product" />
-              <div class="hint">Enter the product URL from your supplier</div>
-            </div>
-
+            
             <div class="input-group">
               <label for="rmbPrice">China Product Price (RMB)</label>
               <input id="rmbPrice" type="number" min="0" step="0.01" />
             </div>
+
+            <div class="input-group">
+              <label for="productLink">Product Link</label>
+              <input id="productLink" type="url" placeholder="https://example.com/product" />
+           
+            </div>
+
+            
 
             <div class="input-group">
               <label for="weightKg">Product Weight (kg)</label>
@@ -507,13 +510,13 @@
             <div class="input-group">
               <label for="courierRmb">China Courier Cost (RMB)</label>
               <input id="courierRmb" type="number" value="5" min="0" step="0.01" />
-              <div class="hint">Default: 5 RMB</div>
+              
             </div>
 
             <div class="input-group">
               <label for="profitMargin">Profit Margin (%)</label>
               <input id="profitMargin" type="number" value="30" min="0" step="1" />
-              <div class="hint">Default: 30%</div>
+             
             </div>
           </div>
 
