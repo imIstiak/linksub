@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ADMIN_PIN = process.env.ADMIN_PIN || '8456'; // Default PIN, should be set in environment
 
 // Middleware
 app.use(cors());
@@ -108,6 +109,189 @@ async function generateUniqueProductCode() {
 // Serve the main HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve the price search page
+app.get('/price', (req, res) => {
+  res.sendFile(path.join(__dirname, 'price.html'));
+});
+
+// Serve the admin panel page
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Public API: Search product by code (only return code and price)
+app.get('/api/search-product', async (req, res) => {
+  try {
+    const code = req.query.code;
+    
+    if (!code) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Product code is required' 
+      });
+    }
+    
+    if (isProduction) {
+      // PostgreSQL
+      const result = await db.query(
+        'SELECT product_code, selling_price FROM products WHERE product_code = $1', 
+        [code]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.json({ success: false, message: 'Product not found' });
+      }
+      
+      res.json({
+        success: true,
+        product: {
+          code: result.rows[0].product_code,
+          price: result.rows[0].selling_price
+        }
+      });
+    } else {
+      // SQLite
+      db.get(
+        'SELECT product_code, selling_price FROM products WHERE product_code = ?', 
+        [code], 
+        (err, row) => {
+          if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ success: false, message: 'Database error' });
+          }
+          
+          if (!row) {
+            return res.json({ success: false, message: 'Product not found' });
+          }
+          
+          res.json({
+            success: true,
+            product: {
+              code: row.product_code,
+              price: row.selling_price
+            }
+          });
+        }
+      );
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Admin authentication
+app.post('/api/admin-auth', (req, res) => {
+  const { pin } = req.body;
+  
+  if (pin === ADMIN_PIN) {
+    res.json({ success: true, message: 'Authentication successful' });
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid PIN' });
+  }
+});
+
+// Admin API: Get all products (protected route)
+app.get('/api/admin/products', async (req, res) => {
+  try {
+    if (isProduction) {
+      // PostgreSQL
+      const result = await db.query('SELECT * FROM products ORDER BY created_at DESC');
+      res.json({ success: true, products: result.rows });
+    } else {
+      // SQLite
+      db.all('SELECT * FROM products ORDER BY created_at DESC', [], (err, rows) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ success: false, message: 'Database error' });
+        }
+        res.json({ success: true, products: rows });
+      });
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Admin API: Update product
+app.put('/api/admin/products/:code', async (req, res) => {
+  try {
+    const productCode = req.params.code;
+    const { link, rmb_price, weight, selling_price } = req.body;
+    
+    if (isProduction) {
+      // PostgreSQL
+      const result = await db.query(
+        'UPDATE products SET link = $1, rmb_price = $2, weight = $3, selling_price = $4 WHERE product_code = $5',
+        [link, rmb_price, weight, selling_price, productCode]
+      );
+      
+      if (result.rowCount === 0) {
+        return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+      
+      res.json({ success: true, message: 'Product updated successfully' });
+    } else {
+      // SQLite
+      db.run(
+        'UPDATE products SET link = ?, rmb_price = ?, weight = ?, selling_price = ? WHERE product_code = ?',
+        [link, rmb_price, weight, selling_price, productCode],
+        function(err) {
+          if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ success: false, message: 'Database error' });
+          }
+          
+          if (this.changes === 0) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+          }
+          
+          res.json({ success: true, message: 'Product updated successfully' });
+        }
+      );
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Admin API: Delete product
+app.delete('/api/admin/products/:code', async (req, res) => {
+  try {
+    const productCode = req.params.code;
+    
+    if (isProduction) {
+      // PostgreSQL
+      const result = await db.query('DELETE FROM products WHERE product_code = $1', [productCode]);
+      
+      if (result.rowCount === 0) {
+        return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+      
+      res.json({ success: true, message: 'Product deleted successfully' });
+    } else {
+      // SQLite
+      db.run('DELETE FROM products WHERE product_code = ?', [productCode], function(err) {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ success: false, message: 'Database error' });
+        }
+        
+        if (this.changes === 0) {
+          return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+        
+        res.json({ success: true, message: 'Product deleted successfully' });
+      });
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // Save new product
