@@ -1,0 +1,15 @@
+# Heroku CLI Installation Commands
+
+# Option 1: Download installer from https://devcenter.heroku.com/articles/heroku-cli
+
+# Option 2: Using Chocolatey (if you have it)
+choco install heroku-cli
+
+# Option 3: Using Scoop (if you have it)
+scoop install heroku
+
+# After installation, verify:
+heroku --version
+
+# Login to Heroku:
+heroku login

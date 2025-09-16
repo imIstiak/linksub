@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RMB → BDT Pricing Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7F56D9;
+      --primary-light: #F4EBFF;
+      --primary-dark: #6941C6;
+      --secondary: #101828;
+      --accent: #F670C7;
+      --accent-dark: #DD2590;
+      --success: #17B26A;
+      --warning: #F79009;
+      --background: #FFFFFF;
+      --surface: #F9FAFB;
+      --border: #EAECF0;
+      --text: #101828;
+      --text-secondary: #475467;
+      --shadow-sm: 0px 1px 2px rgba(16, 24, 40, 0.05);
+      --shadow: 0px 4px 6px -2px rgba(16, 24, 40, 0.03), 0px 12px 16px -4px rgba(16, 24, 40, 0.08);
+      --shadow-lg: 0px 8px 8px -4px rgba(16, 24, 40, 0.03), 0px 20px 24px -4px rgba(16, 24, 40, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--background);
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: var(--secondary);
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .info-pill {
+      display: inline-flex;
+      align-items: center;
+      background: var(--primary-light);
+      padding: 12px 24px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .info-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .main-inputs {
+      animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+
+    .secondary-inputs {
+      animation: fadeIn 0.6s ease-out 0.4s both;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .input-group:hover {
+      transform: translateY(-2px);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .result-highlight {
+      margin: 32px 0;
+    }
+
+    .result-highlight .result-card {
+      transform: scale(1.05);
+    }
+
+    label {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--surface);
+      transition: all 0.2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    input:hover {
+      border-color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+
+    input:disabled {
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: not-allowed;
+    }
+
+    .card {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      animation: fadeIn 0.6s ease-out 0.4s both;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn--primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn--primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      box-shadow: var(--shadow), 0 0 0 3px var(--primary-light);
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+      animation: fadeIn 0.6s ease-out 0.6s both;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .result-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .result-card--highlight {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      border: none;
+      box-shadow: var(--shadow);
+    }
+
+    .result-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: inherit;
+      opacity: 0.9;
+    }
+
+    .result-card .value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .breakdown-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 24px;
+    }
+
+    .breakdown-table th,
+    .breakdown-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .breakdown-table th {
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    .breakdown-table tr:hover td {
+      background: var(--surface);
+    }
+
+    .breakdown-table tr:last-child td {
+      border-bottom: none;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .products-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+
+    .products-table th,
+    .products-table td {
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .products-table th {
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .products-table tr:hover td {
+      background: var(--primary-light);
+    }
+
+    .product-link {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .product-link:hover {
+      text-decoration: underline;
+    }
+
+    .product-code {
+      font-weight: 700;
+      color: var(--secondary);
+      background: var(--primary-light);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .delete-btn {
+      background: var(--warning);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      background: var(--accent-dark);
+      transform: scale(1.05);
+    }
+
+    .no-products {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .footer {
+      margin-top: 64px;
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      animation: fadeIn 0.6s ease-out 0.8s both;
+    }
+
+    .hint {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      transition: color 0.2s ease;
+    }
+
+    .input-group:hover .hint {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    @media (max-width: 1200px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .result-highlight .result-card {
+        transform: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 16px;
+      }
+      
+      .calculator {
+        grid-template-columns: 1fr;
+      }
+
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      .info-pill {
+        display: block;
+        text-align: center;
+        margin: 0 16px;
+      }
+
+      .card {
+        padding: 24px;
+        border-radius: 20px;
+      }
+
+      .result-card {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .section-title {
+        font-size: 16px;
+      }
+    }
+
+    @media (hover: none) {
+      .card:hover,
+      .result-card:hover,
+      .input-group:hover {
+        transform: none;
+      }
+    }
+  </style>
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>RMB → BDT Product Pricing Calculator</h1>
+      <div class="info-pill">
+        1 RMB = 18 BDT · Agent fee 15% · Weight 750 BDT/kg · Packing 10 BDT
+      </div>
+    </header>
+
+    <div class="layout-grid">
+      <div class="main-inputs">
+        <div class="card">
+          <div class="calculator">
+            <div class="input-group">
+              <label for="productLink">Product Link</label>
+              <input id="productLink" type="url" placeholder="https://example.com/product" />
+              <div class="hint">Enter the product URL from your supplier</div>
+            </div>
+
+            <div class="input-group">
+              <label for="rmbPrice">China Product Price (RMB)</label>
+              <input id="rmbPrice" type="number" min="0" step="0.01" />
+            </div>
+
+            <div class="input-group">
+              <label for="weightKg">Product Weight (kg)</label>
+              <input id="weightKg" type="number" min="0" step="0.01" />
+            </div>
+
+            <div class="input-group">
+              <label for="courierRmb">China Courier Cost (RMB)</label>
+              <input id="courierRmb" type="number" value="5" min="0" step="0.01" />
+              <div class="hint">Default: 5 RMB</div>
+            </div>
+
+            <div class="input-group">
+              <label for="profitMargin">Profit Margin (%)</label>
+              <input id="profitMargin" type="number" value="30" min="0" step="1" />
+              <div class="hint">Default: 30%</div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Price Rounding</label>
+            <div class="btn-group">
+              <button class="btn" id="roundNone">Exact Price</button>
+              <button class="btn btn--primary" id="round100">Round to 100</button>
+            </div>
+            <div class="hint">Recommended: Round to nearest 100 for cleaner pricing</div>
+          </div>
+
+          <div class="input-group">
+            <button class="btn btn--primary" id="saveProduct" style="width: 100%; padding: 16px; font-size: 16px; font-weight: 700;">
+              💾 Save Product to Database
+            </button>
+            <div class="hint" id="saveStatus"></div>
+          </div>
+        </div>
+
+        <div class="result-highlight">
+          <div class="result-card result-card--highlight">
+            <h3>Recommended Selling Price</h3>
+            <div class="value" id="sellingPrice">৳0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="secondary-inputs">
+        <div class="card">
+          <h3 class="section-title">Business Settings</h3>
+          <div class="calculator">
+            <div class="input-group">
+              <label for="salaryBdt">Monthly Salary (BDT)</label>
+              <input id="salaryBdt" type="number" value="4500" min="0" step="1" />
+            </div>
+
+            <div class="input-group">
+              <label for="monthlyUnits">Expected Monthly Sales</label>
+              <input id="monthlyUnits" type="number" value="250" min="1" step="1" />
+              <div class="hint">Default: 250 units</div>
+            </div>
+
+            <div class="input-group">
+              <label for="adUsd">Monthly Ad Budget (USD)</label>
+              <input id="adUsd" type="number" value="400" min="0" step="1" />
+              <div class="hint">Default: $400</div>
+            </div>
+
+            <div class="input-group">
+              <label for="usdRate">USD to BDT Rate</label>
+              <input id="usdRate" type="number" value="125" disabled />
+              <div class="hint">Fixed rate: 125 BDT</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="results">
+          <div class="result-card">
+            <h3>Landing Cost</h3>
+            <div class="value" id="landedCost">৳0</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Profit per Unit</h3>
+            <div class="value" id="profitPerUnit">৳0</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Fixed Cost per Unit</h3>
+            <div class="value" id="fixedPerUnit">৳0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Cost Breakdown</h3>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Amount (BDT)</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownRows">
+          <!-- Dynamic rows will be inserted here -->
+        </tbody>
+      </table>
+      <div class="hint">* Delivery charges not included</div>
+    </div>
+
+    <div class="card">
+      <h3>Product Database</h3>
+      <div class="calculator" style="margin-bottom: 24px;">
+        <div class="input-group">
+          <label for="searchCode">Search Products</label>
+          <input id="searchCode" type="text" placeholder="Enter product code (e.g., #LT001) or search link" />
+          <div class="hint">Search by product code or URL</div>
+        </div>
+        <div class="input-group">
+          <div class="btn-group">
+            <button class="btn btn--primary" id="searchBtn">🔍 Search</button>
+            <button class="btn" id="showAllBtn">📋 Show All</button>
+            <button class="btn" id="refreshBtn">🔄 Refresh</button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="productsContainer">
+        <div id="loadingProducts" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+          Loading products...
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <strong>Formula:</strong> Variable landed = (RMB×18 + Courier×18) + 15% of (RMB×18 + Courier×18) + (Weight×750) + Packing. 
+      Fixed/unit = (Salary + AdUSD×USDRate) / MonthlyUnits. 
+      Total landed = Variable landed + Fixed/unit. 
+      Selling = Total landed × (1 + Margin%).
+    </footer>
+  </div>
+
+  <script>
+    // Constants
+    const CONSTANTS = {
+      RMB_TO_BDT: 18,
+      AGENT_COMMISSION: 0.15,
+      WEIGHT_PER_KG: 750,
+      PACKING_BDT: 10,
+      USD_TO_BDT: 125
+    };
+
+    // Initialize elements
+    const elements = {
+      inputs: {
+        productLink: document.getElementById('productLink'),
+        rmbPrice: document.getElementById('rmbPrice'),
+        weightKg: document.getElementById('weightKg'),
+        courierRmb: document.getElementById('courierRmb'),
+        profitMargin: document.getElementById('profitMargin'),
+        salaryBdt: document.getElementById('salaryBdt'),
+        monthlyUnits: document.getElementById('monthlyUnits'),
+        adUsd: document.getElementById('adUsd'),
+        usdRate: document.getElementById('usdRate'),
+        searchCode: document.getElementById('searchCode')
+      },
+      buttons: {
+        roundNone: document.getElementById('roundNone'),
+        round100: document.getElementById('round100'),
+        saveProduct: document.getElementById('saveProduct'),
+        searchBtn: document.getElementById('searchBtn'),
+        showAllBtn: document.getElementById('showAllBtn'),
+        refreshBtn: document.getElementById('refreshBtn')
+      },
+      outputs: {
+        landedCost: document.getElementById('landedCost'),
+        sellingPrice: document.getElementById('sellingPrice'),
+        profitPerUnit: document.getElementById('profitPerUnit'),
+        fixedPerUnit: document.getElementById('fixedPerUnit'),
+        breakdownRows: document.getElementById('breakdownRows'),
+        saveStatus: document.getElementById('saveStatus'),
+        productsContainer: document.getElementById('productsContainer'),
+        loadingProducts: document.getElementById('loadingProducts')
+      }
+    };
+
+    // State management
+    const state = {
+      roundingMode: 100,
+      updateRoundingMode(mode) {
+        this.roundingMode = mode;
+        elements.buttons.roundNone.classList.toggle('btn--primary', mode === 0);
+        elements.buttons.round100.classList.toggle('btn--primary', mode === 100);
+        calculatePrices();
+      }
+    };
+
+    // Formatting utilities
+    const formatters = {
+      currency: new Intl.NumberFormat('bn-BD', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }),
+      formatBDT(amount) {
+        return `৳${this.currency.format(amount)}`;
+      }
+    };
+
+    // Helper functions
+    function getNumericValue(element, defaultValue = 0) {
+      const value = parseFloat(element.value);
+      return isNaN(value) ? defaultValue : value;
+    }
+
+    function ceilToNearest(number, base) {
+      return base ? Math.ceil(number / base) * base : number;
+    }
+
+    // Core calculation logic
+    function calculatePrices() {
+      // Get input values
+      const values = {
+        rmb: getNumericValue(elements.inputs.rmbPrice),
+        weight: getNumericValue(elements.inputs.weightKg),
+        courier: getNumericValue(elements.inputs.courierRmb),
+        margin: getNumericValue(elements.inputs.profitMargin) / 100,
+        salary: getNumericValue(elements.inputs.salaryBdt),
+        units: Math.max(1, getNumericValue(elements.inputs.monthlyUnits, 1)),
+        adSpend: getNumericValue(elements.inputs.adUsd)
+      };
+
+      // Calculate costs
+      const costs = {
+        buying: values.rmb * CONSTANTS.RMB_TO_BDT,
+        courier: values.courier * CONSTANTS.RMB_TO_BDT,
+        weight: values.weight * CONSTANTS.WEIGHT_PER_KG,
+        packing: CONSTANTS.PACKING_BDT
+      };
+
+      costs.agentFee = (costs.buying + costs.courier) * CONSTANTS.AGENT_COMMISSION;
+      costs.advertising = (values.adSpend * CONSTANTS.USD_TO_BDT) / values.units;
+      costs.salaryPerUnit = values.salary / values.units;
+      costs.fixedCosts = costs.salaryPerUnit + costs.advertising;
+      costs.variableCosts = costs.buying + costs.courier + costs.agentFee + costs.weight + costs.packing;
+      costs.total = costs.variableCosts + costs.fixedCosts;
+
+      // Calculate final prices
+      const selling = ceilToNearest(costs.total * (1 + values.margin), state.roundingMode);
+      const profit = Math.max(0, selling - costs.total);
+
+      // Update UI
+      updateDisplay(costs, selling, profit);
+      updateBreakdown(costs, selling);
+    }
+
+    // UI update functions
+    function updateDisplay(costs, selling, profit) {
+      elements.outputs.landedCost.textContent = formatters.formatBDT(costs.total);
+      elements.outputs.sellingPrice.textContent = formatters.formatBDT(selling);
+      elements.outputs.profitPerUnit.textContent = formatters.formatBDT(profit);
+      elements.outputs.fixedPerUnit.textContent = formatters.formatBDT(costs.fixedCosts);
+    }
+
+    function updateBreakdown(costs, selling) {
+      const rows = [
+        { name: 'Product Cost', value: costs.buying },
+        { name: 'Courier Cost', value: costs.courier },
+        { name: 'Agent Commission (15%)', value: costs.agentFee },
+        { name: 'Weight Charges', value: costs.weight },
+        { name: 'Packing Cost', value: costs.packing },
+        { name: 'Fixed Costs per Unit', value: costs.fixedCosts }
+      ];
+
+      elements.outputs.breakdownRows.innerHTML = rows
+        .map(row => `
+          <tr>
+            <td>${row.name}</td>
+            <td>${formatters.formatBDT(row.value)}</td>
+          </tr>
+        `)
+        .join('') + `
+          <tr>
+            <td><strong>Total Landing Cost</strong></td>
+            <td><strong>${formatters.formatBDT(costs.total)}</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Final Selling Price</strong></td>
+            <td><strong>${formatters.formatBDT(selling)}</strong></td>
+          </tr>
+        `;
+    }
+
+    // Product saving functionality
+    async function saveProduct() {
+      // Get current calculated values
+      const values = {
+        rmb: getNumericValue(elements.inputs.rmbPrice),
+        weight: getNumericValue(elements.inputs.weightKg),
+        courier: getNumericValue(elements.inputs.courierRmb),
+        margin: getNumericValue(elements.inputs.profitMargin) / 100,
+        salary: getNumericValue(elements.inputs.salaryBdt),
+        units: Math.max(1, getNumericValue(elements.inputs.monthlyUnits, 1)),
+        adSpend: getNumericValue(elements.inputs.adUsd)
+      };
+
+      // Recalculate selling price to ensure accuracy
+      const costs = {
+        buying: values.rmb * CONSTANTS.RMB_TO_BDT,
+        courier: values.courier * CONSTANTS.RMB_TO_BDT,
+        weight: values.weight * CONSTANTS.WEIGHT_PER_KG,
+        packing: CONSTANTS.PACKING_BDT
+      };
+      costs.agentFee = (costs.buying + costs.courier) * CONSTANTS.AGENT_COMMISSION;
+      costs.advertising = (values.adSpend * CONSTANTS.USD_TO_BDT) / values.units;
+      costs.salaryPerUnit = values.salary / values.units;
+      costs.fixedCosts = costs.salaryPerUnit + costs.advertising;
+      costs.variableCosts = costs.buying + costs.courier + costs.agentFee + costs.weight + costs.packing;
+      costs.total = costs.variableCosts + costs.fixedCosts;
+      const calculatedSellingPrice = ceilToNearest(costs.total * (1 + values.margin), state.roundingMode);
+
+      const productData = {
+        link: elements.inputs.productLink.value.trim(),
+        rmbPrice: values.rmb,
+        weight: values.weight,
+        sellingPrice: calculatedSellingPrice
+      };
+
+      // Validation
+      if (!productData.link) {
+        showSaveStatus('Please enter a product link', 'error');
+        return;
+      }
+      if (!productData.rmbPrice || !productData.weight) {
+        showSaveStatus('Please enter both RMB price and weight', 'error');
+        return;
+      }
+      if (!productData.sellingPrice || isNaN(productData.sellingPrice)) {
+        showSaveStatus('Please calculate the selling price first', 'error');
+        return;
+      }
+
+      try {
+        elements.buttons.saveProduct.disabled = true;
+        elements.buttons.saveProduct.textContent = '⏳ Saving...';
+        showSaveStatus('Saving product...', 'info');
+
+        const response = await fetch('/api/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(productData)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          showSaveStatus(`✅ Product saved! Code: ${result.productCode}`, 'success');
+          // Optionally clear the form
+          elements.inputs.productLink.value = '';
+        } else {
+          const error = await response.json();
+          showSaveStatus(`❌ Error: ${error.message}`, 'error');
+        }
+      } catch (error) {
+        showSaveStatus(`❌ Network error: ${error.message}`, 'error');
+      } finally {
+        elements.buttons.saveProduct.disabled = false;
+        elements.buttons.saveProduct.textContent = '💾 Save Product to Database';
+      }
+    }
+
+    function showSaveStatus(message, type) {
+      elements.outputs.saveStatus.textContent = message;
+      elements.outputs.saveStatus.style.color = type === 'error' ? 'var(--warning)' : 
+                                               type === 'success' ? 'var(--success)' : 
+                                               'var(--primary)';
+      
+      if (type === 'success' || type === 'error') {
+        setTimeout(() => {
+          elements.outputs.saveStatus.textContent = '';
+        }, 5000);
+      }
+    }
+
+    // Product database functions
+    async function loadAllProducts() {
+      try {
+        elements.outputs.loadingProducts.style.display = 'block';
+        const response = await fetch('/api/products');
+        const products = await response.json();
+        displayProducts(products);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        elements.outputs.productsContainer.innerHTML = '<div class="no-products">❌ Error loading products</div>';
+      } finally {
+        elements.outputs.loadingProducts.style.display = 'none';
+      }
+    }
+
+    async function searchProducts() {
+      const query = elements.inputs.searchCode.value.trim();
+      if (!query) {
+        loadAllProducts();
+        return;
+      }
+
+      try {
+        elements.outputs.loadingProducts.style.display = 'block';
+        const response = await fetch(`/api/products/search/${encodeURIComponent(query)}`);
+        const products = await response.json();
+        displayProducts(products);
+      } catch (error) {
+        console.error('Error searching products:', error);
+        elements.outputs.productsContainer.innerHTML = '<div class="no-products">❌ Error searching products</div>';
+      } finally {
+        elements.outputs.loadingProducts.style.display = 'none';
+      }
+    }
+
+    function displayProducts(products) {
+      if (!products || products.length === 0) {
+        elements.outputs.productsContainer.innerHTML = '<div class="no-products">📦 No products found</div>';
+        return;
+      }
+
+      const table = `
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Link</th>
+              <th>RMB Price</th>
+              <th>Weight (kg)</th>
+              <th>Selling Price</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${products.map(product => `
+              <tr>
+                <td><span class="product-code">${product.product_code}</span></td>
+                <td><a href="${product.link}" target="_blank" class="product-link">${truncateUrl(product.link)}</a></td>
+                <td>¥${product.rmb_price}</td>
+                <td>${product.weight} kg</td>
+                <td>৳${formatters.currency.format(product.selling_price)}</td>
+                <td>${formatDate(product.created_at)}</td>
+                <td><button class="delete-btn" onclick="deleteProduct('${product.product_code}')">🗑️ Delete</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      
+      elements.outputs.productsContainer.innerHTML = table;
+    }
+
+    function truncateUrl(url, maxLength = 40) {
+      if (url.length <= maxLength) return url;
+      return url.substring(0, maxLength) + '...';
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    async function deleteProduct(productCode) {
+      if (!confirm(`Are you sure you want to delete product ${productCode}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/products/${encodeURIComponent(productCode)}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showSaveStatus(`✅ Product ${productCode} deleted successfully`, 'success');
+          loadAllProducts(); // Refresh the list
+        } else {
+          const error = await response.json();
+          showSaveStatus(`❌ Error: ${error.message}`, 'error');
+        }
+      } catch (error) {
+        showSaveStatus(`❌ Network error: ${error.message}`, 'error');
+      }
+    }
+
+    // Event listeners
+    Object.values(elements.inputs).forEach(input => {
+      if (!input.disabled && input.id !== 'searchCode') {
+        input.addEventListener('input', calculatePrices);
+      }
+    });
+
+    elements.buttons.roundNone.addEventListener('click', () => state.updateRoundingMode(0));
+    elements.buttons.round100.addEventListener('click', () => state.updateRoundingMode(100));
+    elements.buttons.saveProduct.addEventListener('click', saveProduct);
+    elements.buttons.searchBtn.addEventListener('click', searchProducts);
+    elements.buttons.showAllBtn.addEventListener('click', loadAllProducts);
+    elements.buttons.refreshBtn.addEventListener('click', loadAllProducts);
+    
+    // Search on Enter key
+    elements.inputs.searchCode.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchProducts();
+      }
+    });
+
+    // Initialize
+    calculatePrices();
+    loadAllProducts();
+  </script>
+</body>
+</html> 
