@@ -4,7 +4,7 @@
   "description": "RMB to BDT pricing calculator with product database",
   "main": "server.js",
   "engines": {
-    "node": "18.x",
+    "node": "22.x",
     "npm": "9.x"
   },
   "scripts": {
