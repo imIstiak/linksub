@@ -64,6 +64,17 @@
       }
     }
 
+    @keyframes slideIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(-10px) scale(0.95); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+      }
+    }
+
     h1 {
       color: var(--secondary);
       font-size: 36px;
@@ -118,7 +129,7 @@
     }
 
     .input-group {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       transition: all 0.2s ease;
     }
 
@@ -520,6 +531,10 @@
               💾 Save Product to Database
             </button>
             <div class="hint" id="saveStatus"></div>
+            <div id="productCodeDisplay" style="display: none; text-align: center; margin-top: 15px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; font-size: 18px; font-weight: bold; animation: slideIn 0.5s ease;">
+              <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ Product Saved Successfully!</div>
+              <div style="font-size: 24px; font-weight: 900; letter-spacing: 1px;" id="productCodeValue"></div>
+            </div>
           </div>
         </div>
 
@@ -532,6 +547,23 @@
       </div>
 
       <div class="secondary-inputs">
+        <div class="results">
+          <div class="result-card">
+            <h3>Landing Cost</h3>
+            <div class="value" id="landedCost">৳0</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Profit per Unit</h3>
+            <div class="value" id="profitPerUnit">৳0</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Fixed Cost per Unit</h3>
+            <div class="value" id="fixedPerUnit">৳0</div>
+          </div>
+        </div>
+
         <div class="card">
           <h3 class="section-title">Business Settings</h3>
           <div class="calculator">
@@ -557,23 +589,6 @@
               <input id="usdRate" type="number" value="125" disabled />
               <div class="hint">Fixed rate: 125 BDT</div>
             </div>
-          </div>
-        </div>
-
-        <div class="results">
-          <div class="result-card">
-            <h3>Landing Cost</h3>
-            <div class="value" id="landedCost">৳0</div>
-          </div>
-
-          <div class="result-card">
-            <h3>Profit per Unit</h3>
-            <div class="value" id="profitPerUnit">৳0</div>
-          </div>
-
-          <div class="result-card">
-            <h3>Fixed Cost per Unit</h3>
-            <div class="value" id="fixedPerUnit">৳0</div>
           </div>
         </div>
       </div>
@@ -649,7 +664,9 @@
         profitPerUnit: document.getElementById('profitPerUnit'),
         fixedPerUnit: document.getElementById('fixedPerUnit'),
         breakdownRows: document.getElementById('breakdownRows'),
-        saveStatus: document.getElementById('saveStatus')
+        saveStatus: document.getElementById('saveStatus'),
+        productCodeDisplay: document.getElementById('productCodeDisplay'),
+        productCodeValue: document.getElementById('productCodeValue')
       }
     };
 
@@ -823,9 +840,17 @@
 
         if (response.ok) {
           const result = await response.json();
-          showSaveStatus(`✅ Product saved! Code: ${result.productCode}`, 'success');
-          // Optionally clear the form
+          showSaveStatus(`✅ Product saved successfully!`, 'success');
+          
+          // Show product code display permanently
+          elements.outputs.productCodeValue.textContent = result.productCode;
+          elements.outputs.productCodeDisplay.style.display = 'block';
+          
+          // Clear the form inputs
           elements.inputs.productLink.value = '';
+          elements.inputs.rmbPrice.value = '';
+          elements.inputs.weightKg.value = '';
+          calculatePrices(); // Recalculate to reset prices
         } else {
           const error = await response.json();
           showSaveStatus(`❌ Error: ${error.message}`, 'error');
@@ -847,14 +872,27 @@
       if (type === 'success' || type === 'error') {
         setTimeout(() => {
           elements.outputs.saveStatus.textContent = '';
-        }, 5000);
+        }, 3000);
+      }
+    }
+
+    // Function to hide product code display when starting new calculation
+    function hideProductCodeDisplay() {
+      if (elements.outputs.productCodeDisplay) {
+        elements.outputs.productCodeDisplay.style.display = 'none';
       }
     }
 
     // Event listeners
     Object.values(elements.inputs).forEach(input => {
       if (!input.disabled) {
-        input.addEventListener('input', calculatePrices);
+        input.addEventListener('input', () => {
+          // Hide product code display when user starts entering new data
+          if (input.id === 'productLink' || input.id === 'rmbPrice' || input.id === 'weightKg') {
+            hideProductCodeDisplay();
+          }
+          calculatePrices();
+        });
       }
     });
 
